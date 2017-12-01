@@ -13,16 +13,11 @@
 #define SD_READ       "r"
 #define SD_WRITE      "w"
 #define SD_APPEND     "a"
-
+#define SD_READ_WRITE "r+"
 
 class SDStorage {
 
 public:
-//    struct HumidityVal {
-//        float v1;
-//        float v2;
-//        float v3;
-//    };
 
     SDStorage(PinName mosi, PinName miso, PinName sclk, PinName cs);
 
@@ -35,54 +30,36 @@ public:
     FILE *open(const char *path);
 
     inline int close(FILE *f){
-        fclose(f);
+        return fclose(f);
     }
 
     // return number size if read sucessful
     size_t read(const char *filePath, void *dataBuf, size_t size, size_t count);
-
-    size_t onlyRead(FILE *f, void *dataBuf, size_t size, size_t count);
 
     /*@return number of elements of size size written (which is equal to count)*/
     size_t write(const char *filePath, void *data, size_t size, size_t count);
 
     size_t update(const char *filePath, void *data, size_t size, size_t count);
 
-    size_t uprintf(const char *filePath, const char *data);
-
+    /*TODO change this to seek and read*/
     int seek(const char *filePath, long offSet, int whence);
 
     uint16_t getFileSize(const char *filePath);
 
     dirent *ls(const char *dirPath);
 
-    inline int flush(const char *filePath) {
-        FILE *f = fopen(filePath, SD_READ);
-        int ret = fflush(f);
-        fclose(f);
-        return ret;
-    }
+    /*TODO implement copy file -> x-measure.bin, x-send.bin*/
+    int copyFile(const char *sourceFilePath, const char * destinationFilePath);
+
+    int flush(const char *filePath);
 
     inline int rmFile(const char *filePath) {
         return remove(filePath);
     }
 
-    inline int isEOF(const char *filePath) {
-        FILE *f = fopen(filePath, SD_READ);
-        int ret = feof(f);
-        fclose(f);
-        return ret;
-    }
-
-    inline void doRewind(const char *filePath) {
-        FILE *f = fopen(filePath, SD_READ);
-        rewind(f);
-//        fclose(f);
-//        return ret;
-    }
+    int isEOF(const char *filePath);
 
     virtual void lock();
-
 
     virtual void unlock();
 
@@ -91,8 +68,8 @@ private:
     SDBlockDevice sd;
     FATFileSystem fs;
 
-    static SingletonPtr<PlatformMutex> _mutex;
-
+//    static SingletonPtr<PlatformMutex> _mutex;
+    Mutex _mutex;
 
 };
 #endif //UBIRCH_SD_DRIVER_SDSTORAGE_H

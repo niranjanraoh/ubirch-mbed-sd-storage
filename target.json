@@ -1,8 +1,10 @@
 {
   "target_overrides": {
     "UBRIDGE": {
-      "USBTX" : "PTB17",
-      "USBRX" : "PTB16"
+      "hardware": {
+        "USBTX": "PTB17",
+        "USBRX": "PTB16"
+      }
     }
   }
 }

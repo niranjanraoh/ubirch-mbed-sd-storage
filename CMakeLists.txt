@@ -3,7 +3,7 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_C_COMPILER_WORKS TRUE)
 set(CMAKE_CXX_COMPILER_WORKS TRUE)
 
-project(ubirch-mre-sensor C CXX)
+project(ubirch-sd-driver C CXX)
 set(CMAKE_CXX_STANDARD 98)
 
 # == MBED OS 5 settings ==
@@ -38,6 +38,7 @@ add_definitions(
         -DMBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE=9600
         -DMBED_CONF_PLATFORM_STDIO_FLUSH_AT_EXIT=0
         -DMBED_CONF_PLATFORM_STDIO_CONVERT_NEWLINES=0
+        -DMBED_CONF_APP_FSFAT_SDCARD_INSTALLED
 )
 
 set(MBED_OS
@@ -78,7 +79,7 @@ set(MBED_OS
         mbed-os
         )
 
-set(MBED_OS_SRCS "")
+set(MBED_OS_SRCS "" source/SDStorage.cpp source/SDStorage.h)
 foreach (DIR in ${MBED_OS})
     if (DIR MATCHES "mbed-os/features")
         foreach(FEATURE in ${FEATURES})
@@ -92,63 +93,91 @@ foreach (DIR in ${MBED_OS})
     endif ()
 endforeach ()
 
-add_library(mbed-os ${MBED_OS_SRCS})
+add_library(mbed-os ${MBED_OS_SRCS} source/examples/structFile.cpp)
 include_directories(${MBED_OS})
 # == END MBED OS 5 ==
 
-add_library(ubirch-mbed-quectel-m66
-        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial/BufferedPrint.c
-        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial/BufferedSerial.cpp
-        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial/Buffer/MyBuffer.cpp
-        ubirch-mbed-quectel-m66/source/M66ATParser/M66ATParser.cpp
-        ubirch-mbed-quectel-m66/source/M66Interface.cpp
-        )
-target_include_directories(ubirch-mbed-quectel-m66 PUBLIC
-        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial/Buffer
-        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial
-        ubirch-mbed-quectel-m66/source/M66ATParser
-        ubirch-mbed-quectel-m66/source
+#add_library(ubirch-mbed-quectel-m66
+#        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial/BufferedPrint.c
+#        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial/BufferedSerial.cpp
+#        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial/Buffer/MyBuffer.cpp
+#        ubirch-mbed-quectel-m66/source/M66ATParser/M66ATParser.cpp
+#        ubirch-mbed-quectel-m66/source/M66Interface.cpp
+#        )
+#target_include_directories(ubirch-mbed-quectel-m66 PUBLIC
+#        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial/Buffer
+#        ubirch-mbed-quectel-m66/source/M66ATParser/BufferedSerial
+#        ubirch-mbed-quectel-m66/source/M66ATParser
+#        ubirch-mbed-quectel-m66/source
+#        )
+#
+#include(ubirch-mbed-crypto/ubirch-mbed-nacl-cm0/lib.cmake)
+#
+#add_library(crypto
+#        ubirch-mbed-crypto/source/ubirchCrypto.cpp
+#        ubirch-mbed-crypto/source/KeyPair.cpp
+#        ubirch-mbed-crypto/source/Base64.cpp
+#        )
+#target_include_directories(crypto PUBLIC ubirch-mbed-crypto/source)
+#target_link_libraries(crypto libnacl)
+
+add_library(SDDRIVER
+        sd-driver/TESTS/block_device/basic/basic.cpp
+        sd-driver/TESTS/filesystem/basic/basic.cpp
+        sd-driver/TESTS/filesystem/fopen/fopen.cpp
+        sd-driver/util/fsfat_debug.h
+        sd-driver/util/fsfat_test.c
+        sd-driver/util/fsfat_test.h
+        sd-driver/SDBlockDevice.cpp
+        sd-driver/SDBlockDevice.h
         )
 
-include(ubirch-mbed-crypto/ubirch-mbed-nacl-cm0/lib.cmake)
-
-add_library(crypto
-        ubirch-mbed-crypto/source/ubirchCrypto.cpp
-        ubirch-mbed-crypto/source/KeyPair.cpp
-        ubirch-mbed-crypto/source/Base64.cpp
+target_include_directories(SDDRIVER PUBLIC
+        sd-driver/TESTS/filesystem/fopen
+        sd-driver/TESTS/filesystem/basic
+        sd-driver/TESTS/filesystem/
+        sd-driver/TESTS/block_device/basic
+        sd-driver/TESTS/filesystem
+        sd-driver/TESTS/
+        sd-driver/util
+        sd-driver
         )
-target_include_directories(crypto PUBLIC ubirch-mbed-crypto/source)
-target_link_libraries(crypto libnacl)
-
 #add_library(JSMN jsmn/jsmn.c)
 #target_include_directories(JSMN PUBLIC jsmn)
 
 #add_library(VLLS mbed-kinetis-lowpower/kinetis_lowpower.cpp)
 #target_include_directories(VLLS PUBLIC mbed-kinetis-lowpower)
 
-add_library(HTTP mbed-http/http_parser/http_parser.c)
-target_include_directories(HTTP PUBLIC mbed-http/http_parser
-        mbed-http/source
-        mbed-http)
+#add_library(HTTP mbed-http/http_parser/http_parser.c)
+#target_include_directories(HTTP PUBLIC mbed-http/http_parser
+#        mbed-http/source
+#        mbed-http)
 
 #add_library(DBGUTILS dbgutil/dbgutil.c)
 #target_include_directories(DBGUTILS PUBLIC dbgutil)
 
-add_library(BME280 BME280/BME280.cpp)
-target_include_directories(BME280 PUBLIC BME280)
+#add_library(BME280 BME280/BME280.cpp)
+#target_include_directories(BME280 PUBLIC BME280)
 
 add_executable(ubirch
-        source/main.cpp
-        source/ubirch/ubirch.cpp
-        config.h source/ubirch/ubirchTRNG.c)
+        source/SDStorage.cpp
+        source/SDStorage.h
+        source/examples/structFile.cpp
+        source/examples/sd-fs.cpp
+#        source/ubirch/ubirch.cpp
+#        config.h source/ubirch/ubirchTRNG.c
+        source/examples/sd-fat.cpp
+        source/examples/ex-1.cpp source/examples/structFile.cpp)
 
 target_link_libraries(ubirch mbed-os
-        ubirch-mbed-quectel-m66
-        crypto
-        HTTP
-        BME280
+        SDDRIVER
+        edebug
+#        ubirch-mbed-quectel-m66
+#        crypto
+#        HTTP
+#        BME280
         )
 
-add_custom_target(ubirch-mre-compile ALL
+add_custom_target(ubirch-sddriver-compile ALL
         COMMAND mbed compile --profile mbed-os/tools/profiles/debug.json
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

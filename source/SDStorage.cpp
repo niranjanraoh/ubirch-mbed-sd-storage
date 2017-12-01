@@ -23,7 +23,6 @@ int SDStorage::init() {
 
 int SDStorage::format() {
     return FATFileSystem::format(&sd);
-//    return 0;
 }
 
 int SDStorage::mount(SDBlockDevice *sd) {
@@ -52,13 +51,6 @@ size_t SDStorage::read(const char *filePath, void *dataBuf, size_t size, size_t 
     size_t ret = 0;
     ret = fread(dataBuf, size, count, f);
     fclose(f);
-    unlock();
-    return ret;
-}
-
-size_t SDStorage::onlyRead(FILE *f, void *dataBuf, size_t size, size_t count) {
-    lock();
-    size_t ret = fread(dataBuf, size, count, f);
     unlock();
     return ret;
 }
@@ -112,12 +104,14 @@ dirent * SDStorage::ls(const char *dirPath) {
     return de;
 }
 
-size_t SDStorage::uprintf(const char *filePath, const char *data) {
-    lock();
-    FILE *f = fopen(filePath, SD_APPEND);
-    size_t ret = static_cast<size_t>(fprintf(f, data));/*"S1: %f, S2: %f, S3: %f\r\n", data.v1, data.v2, data.v3);*/
+int SDStorage::copyFile(const char *sourceFilePath, const char *destinationFilePath) {
+    return 0;
+}
+
+int SDStorage::flush(const char *filePath)  {
+    FILE *f = fopen(filePath, SD_READ);
+    int ret = fflush(f);
     fclose(f);
-    unlock();
     return ret;
 }
 
@@ -126,10 +120,17 @@ FILE * SDStorage::open(const char *path) {
     return f;
 }
 
+int SDStorage::isEOF(const char *filePath){
+    FILE *f = fopen(filePath, SD_READ);
+    int ret = feof(f);
+    fclose(f);
+    return ret;
+}
+
 void SDStorage::lock() {
-    _mutex->lock();
+    _mutex.lock();
 }
 
 void SDStorage::unlock() {
-    _mutex->unlock();
+    _mutex.unlock();
 }
