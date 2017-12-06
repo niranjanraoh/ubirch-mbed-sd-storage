@@ -5,7 +5,7 @@
 #include "SDStorage.h"
 
 #if NDEBUG
-#define PRINTF (...)
+#define PRINTF(...)
 #else
 #define PRINTF printf
 #endif
@@ -99,7 +99,7 @@ int SDStorage::seek(const char *filePath, long offSet, int whence) {
 
 uint16_t SDStorage::getFileSize(const char *filePath) {
     lock();
-    FILE *f = fopen(filePath, SD_READ);
+    FILE *f = fopen(filePath, "r+");
     if (f == NULL){
         PRINTF("Failed to open %s\r\n", filePath);
         return 0;
@@ -130,12 +130,14 @@ int SDStorage::copyFile(const char *sourceFilePath, const char *destinationFileP
     srcF = fopen(sourceFilePath, SD_READ);
     if (srcF == NULL) {
         PRINTF("Failed to open %s\r\n", sourceFilePath);
+        return 1;
     }
 
-    destF = fopen(destinationFilePath, SD_APPEND);
+    destF = fopen(destinationFilePath, SD_WRITE);
     if (destF == NULL) {
         PRINTF("Failed to open %s \r\n", destinationFilePath);
         fclose(srcF);
+        return 1;
     }
 
     int a = 0;
@@ -166,19 +168,33 @@ int SDStorage::copyFile(const char *sourceFilePath, const char *destinationFileP
 int SDStorage::flush(const char *filePath)  {
     lock();
     FILE *f = fopen(filePath, SD_READ);
+    if (f == NULL){
+        PRINTF("Failed to open %s\r\n", filePath);
+        return 0;
+    }
     int ret = fflush(f);
     fclose(f);
     unlock();
     return ret;
 }
 
-void SDStorage::open(const char *path) {
-    FILE *f = fopen(path, SD_WRITE);
+void SDStorage::open(const char *filePath) {
+    lock();
+    FILE *f = fopen(filePath, SD_WRITE);
+    if (f == NULL){
+        PRINTF("Failed to open %s\r\n", filePath);
+        return;
+    }
     fclose(f);
+    unlock();
 }
 
 int SDStorage::isEOF(const char *filePath){
     FILE *f = fopen(filePath, SD_READ);
+    if (f == NULL){
+        PRINTF("Failed to open %s\r\n", filePath);
+        return 0;
+    }
     int ret = feof(f);
     fclose(f);
     return ret;

@@ -27,7 +27,7 @@ public:
 
     int mount(SDBlockDevice *sd);
 
-    void open(const char *path);
+    void open(const char *filePath);
 
     inline int close(FILE *f){
         return fclose(f);
