@@ -125,6 +125,7 @@ dirent * SDStorage::ls(const char *dirPath) {
 }
 
 int SDStorage::copyFile(const char *sourceFilePath, const char *destinationFilePath) {
+    lock();
     FILE *srcF, *destF;
 
     srcF = fopen(sourceFilePath, SD_READ);
@@ -162,6 +163,7 @@ int SDStorage::copyFile(const char *sourceFilePath, const char *destinationFileP
     remove(sourceFilePath);
 //    }
 
+    unlock();
     return 0;
 }
 
