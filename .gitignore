@@ -4,6 +4,7 @@ mbed_settings.py
 *.pyc
 
 mbed-os
+mbed-os.lib
 msgpack
 trackle-device-test
 ubirch-mbed-ble
@@ -14,6 +15,7 @@ BME280
 ubirch-mbed-crypto
 ubirch-mbed-quectel-m66
 mbed-http
+ubirch-mbed-sd-storage
 
 config.h
 

@@ -2,7 +2,7 @@
 // Created by nirao on 22.11.17.
 //
 
-#if 1
+#if 0
 
 #include "mbed.h"
 #include "SDBlockDevice.h"
