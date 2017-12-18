@@ -190,7 +190,11 @@ int SDStorage::copyFile(const char *sourceFilePath, const char *destinationFileP
 
 int SDStorage::renameFile(const char *sourceFilePath, const char *destinationFilePath) {
     _mutex.lock();
-    int ret = rename(sourceFilePath, destinationFilePath);
+    int ret = 0;
+    if(rename(sourceFilePath, destinationFilePath) == -1){
+        remove(destinationFilePath);
+        ret = renameFile(sourceFilePath, destinationFilePath);
+    }
     _mutex.unlock();
     return ret;
 }
