@@ -2,4 +2,3 @@ mbed-os/features/mbedtls/*
 cmake-*
 Debug/*
 sd-driver/config/mbed_lib.json
-mbed-os/TESTS/mbedtls/*

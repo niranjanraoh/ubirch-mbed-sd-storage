@@ -16,8 +16,9 @@ ubirch-mbed-crypto
 ubirch-mbed-quectel-m66
 mbed-http
 ubirch-mbed-sd-storage
-
+source/examples/*
 config.h
+sd-driver/*
 
 cmake-build-debug/
 .idea/*
